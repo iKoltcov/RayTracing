@@ -1,0 +1,23 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RayTracing.OpenTK", "RayTracing.OpenTK\RayTracing.OpenTK.csproj", "{368C70AF-B463-4664-97FC-86212F418CD6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RayTracing", "RayTracing\RayTracing.csproj", "{2C93D384-3D9E-4F60-9765-63D2F425B2DC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{368C70AF-B463-4664-97FC-86212F418CD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{368C70AF-B463-4664-97FC-86212F418CD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{368C70AF-B463-4664-97FC-86212F418CD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{368C70AF-B463-4664-97FC-86212F418CD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C93D384-3D9E-4F60-9765-63D2F425B2DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C93D384-3D9E-4F60-9765-63D2F425B2DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C93D384-3D9E-4F60-9765-63D2F425B2DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C93D384-3D9E-4F60-9765-63D2F425B2DC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
