@@ -1,6 +1,8 @@
-﻿namespace RayTracing.Entities.Interfaces
+﻿using System.Numerics;
+namespace RayTracing.Entities.Interfaces
 {
-    public interface IEssence
+    public interface IEssence : ICoordinatable
     {
+        Vector3? CheckCollision(RayEntity ray);
     }
 }

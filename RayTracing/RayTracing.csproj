@@ -8,5 +8,6 @@
     <Folder Include="Services\" />
     <Folder Include="Entities\" />
     <Folder Include="Entities\Interfaces\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
 </Project>

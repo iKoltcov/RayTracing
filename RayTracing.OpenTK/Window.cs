@@ -5,14 +5,15 @@ using RayTracing.Services;
 using RayTracing.OpenTK.Services;
 using RayTracing.OpenTK.Entities;
 using RayTracing.Entities;
+using OpenTK.Graphics;
 
 namespace RayTracing.OpenTK
 {
     public class Window : GameWindow
     {
         private readonly int countTask = 4;
-        private readonly int cellWidth = 100;
-        private readonly int cellHeight = 100;
+        private readonly int cellWidth = 450;
+        private readonly int cellHeight = 450;
 
         private readonly int vertexSize = 2;
         private readonly int colorSize = 4;
@@ -27,7 +28,7 @@ namespace RayTracing.OpenTK
         private float[] arrayVertexs;
         private float[] arrayColors;
 
-        public Window()
+        public Window() : base(600, 600, GraphicsMode.Default, "RayTracing")
         {
             rayTracingService = new RayTracingService(cellWidth, cellHeight, countTask);
             shaderService = new ShaderService();
@@ -129,42 +130,27 @@ namespace RayTracing.OpenTK
 
             rayTracingService.AddLight(new PointLightEntity()
             {
-                X = 0.0f,
-                Y = 0.0f,
-                Z = 10.0f,
+                Position = new System.Numerics.Vector3(0.0f, 10.0f, 0.0f),
                 Color = new ColorEntity(1.0f, 1.0f, 1.0f)
             });
-            rayTracingService.AddEssence(new SphereEntity { 
-                X = 0.0f,
-                Y = 5.0f,
-                Z = 1.0f,
-                Radius = 1.0f,
-                Color = new ColorEntity(1.0f, 0.0f, 0.0f)
-            });
-            rayTracingService.AddEssence(new SphereEntity
+            rayTracingService.AddLight(new PointLightEntity()
             {
-                X = 5.0f,
-                Y = 0.0f,
-                Z = 1.0f,
-                Radius = 1.0f,
-                Color = new ColorEntity(0.0f, 1.0f, 0.0f)
+                Position = new System.Numerics.Vector3(10.0f, 10.0f, -5.0f),
+                Color = new ColorEntity(1.0f, 1.0f, 1.0f)
             });
-            rayTracingService.AddEssence(new SphereEntity
+
+            for (int i = -1; i < 2; i++)
             {
-                X = 0.0f,
-                Y = -5.0f,
-                Z = 1.0f,
-                Radius = 1.0f,
-                Color = new ColorEntity(0.0f, 0.0f, 1.0f)
-            });
-            rayTracingService.AddEssence(new SphereEntity
-            {
-                X = -5.0f,
-                Y = 0.0f,
-                Z = 1.0f,
-                Radius = 1.0f,
-                Color = new ColorEntity(1.0f, 1.0f, 0.0f)
-            });
+                for(int j = -1; j < 2; j++)
+                {
+                    rayTracingService.AddEssence(new SphereEntity
+                        {
+                            Color = ColorEntity.Random,
+                            Position = new System.Numerics.Vector3(i, j, 4.0f),
+                            Radius = 0.5f
+                        });
+                }
+            }
         }
 
         protected override void OnResize(EventArgs e)
@@ -189,7 +175,7 @@ namespace RayTracing.OpenTK
             MakeCurrent();
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            matrix = Matrix4.CreateOrthographicOffCenter(0, Width, Height, 0, -1.0f, 1.0f);
+            matrix = Matrix4.CreateOrthographicOffCenter(0, Width, 0, Height, -1.0f, 1.0f);
 
             GL.EnableVertexAttribArray((int)ShaderAttributeEntity.Vertex);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferHandle);

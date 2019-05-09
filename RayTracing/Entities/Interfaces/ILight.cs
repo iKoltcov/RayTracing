@@ -1,6 +1,6 @@
 ﻿namespace RayTracing.Entities.Interfaces
 {
-    public interface ILight
+    public interface ILight : ICoordinatable
     {
     }
 }

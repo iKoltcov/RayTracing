@@ -1,8 +1,8 @@
 ﻿using System.Numerics;
 namespace RayTracing.Entities.Interfaces
 {
-    public interface ICoordinatable
+    public interface ITargetable
     {
-        Vector3 Position { get; set; }
+        Vector3 Target { get; set; }
     }
 }
