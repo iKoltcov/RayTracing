@@ -8,5 +8,7 @@ namespace RayTracing.Entities
         public Vector3 Position { get; set; }
 
         public ColorEntity Color { get; set; }
+
+        public float Intensity { get; set; }
     }
 }

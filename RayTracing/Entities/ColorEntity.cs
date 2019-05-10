@@ -60,7 +60,11 @@ namespace RayTracing.Entities
 
         public static ColorEntity operator *(ColorEntity color, float value)
         {
-            return new ColorEntity(color.R * value, color.G * value, color.B * value);
+            float r = Math.Min(color.R * value, 1.0f);
+            float g = Math.Min(color.G * value, 1.0f);
+            float b = Math.Min(color.B * value, 1.0f);
+
+            return new ColorEntity(r, g, b);
         }
     }
 }

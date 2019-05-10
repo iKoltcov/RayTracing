@@ -98,16 +98,19 @@ namespace RayTracing.OpenTK
             rayTracingService.AddLight(new PointLightEntity()
             {
                 Position = new System.Numerics.Vector3(10.0f, 10.0f, 0.0f),
+                Intensity = 0.4f,
                 Color = new ColorEntity(1.0f, 1.0f, 1.0f)
             });
             rayTracingService.AddLight(new PointLightEntity()
             {
                 Position = new System.Numerics.Vector3(-20.0f, 5.0f, -10.0f),
+                Intensity = 0.6f,
                 Color = new ColorEntity(1.0f, 1.0f, 1.0f)
             });
             rayTracingService.AddLight(new PointLightEntity()
             {
                 Position = new System.Numerics.Vector3(-20.0f, -20.0f, -10.0f),
+                Intensity = 1.0f,
                 Color = new ColorEntity(1.0f, 1.0f, 1.0f)
             });
 

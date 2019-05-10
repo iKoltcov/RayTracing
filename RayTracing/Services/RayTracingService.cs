@@ -119,7 +119,7 @@ namespace RayTracing.Services
 
                 if(SceneIntersect(rayToLight, distanceToLight) == null)
                 {
-                    diffuseLightIntensity += Math.Max(0.0f, Vector3.Dot(directionToLight, normal));
+                    diffuseLightIntensity += (light.Intensity / distanceToLight * distanceToLight) * Math.Max(0.0f, Vector3.Dot(directionToLight, normal));
                 }
             }
 
