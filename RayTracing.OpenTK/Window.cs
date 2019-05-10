@@ -29,7 +29,7 @@ namespace RayTracing.OpenTK
         private float[] arrayVertexs;
         private float[] arrayColors;
 
-        public Window() : base(600, 600, GraphicsMode.Default, "RayTracing")
+        public Window() : base(800, 800, GraphicsMode.Default, "RayTracing")
         {
             rayTracingService = new RayTracingService(cellWidth, cellHeight, countTask);
             shaderService = new ShaderService();

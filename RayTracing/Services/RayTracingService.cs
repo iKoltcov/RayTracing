@@ -21,6 +21,9 @@ namespace RayTracing.Services
         private int width, height;
         private ColorEntity[,] pixels;
 
+        private readonly float fieldOfView = 1.57f;
+        private readonly ColorEntity backgroundColor = ColorEntity.Black; 
+
         private List<IEssence> essences;
         private List<ILight> lights;
 
@@ -36,7 +39,7 @@ namespace RayTracing.Services
             for (int widthIterator = 0; widthIterator < width; widthIterator++) {
                 for (int heightIterator = 0; heightIterator < height; heightIterator++)
                 {
-                    pixels[widthIterator, heightIterator] = ColorEntity.Black;
+                    pixels[widthIterator, heightIterator] = backgroundColor;
                 }
             }
 
@@ -68,8 +71,7 @@ namespace RayTracing.Services
             for (int taskIterator = 0; taskIterator < countTask; taskIterator++)
             {
                 var cancellationToken = cancellationTokenSource.Token;
-                var task = new Task(() => RaysTrace(cancellationToken), cancellationToken);
-                task.Start();
+                Task.Run(() => RaysTrace(cancellationToken), cancellationToken);
             }
         }
 
@@ -81,30 +83,24 @@ namespace RayTracing.Services
                 {
                     var x = random.Next(0, width);
                     var y = random.Next(0, height);
-                    pixels[x, y] = CastRay(x, y);
+                    var direction = new Vector3(x + 0.5f - (width * 0.5f), y + 0.5f - (height * 0.5f), width / (float)Math.Tan(fieldOfView * 0.5f));
+
+                    pixels[x, y] = CastRay(new RayEntity()
+                    {
+                        Origin = new Vector3(0.0f, 0.0f, 0.0f),
+                        Direction = direction.Normalize()
+                    });
                 }
             }
         }
 
-        private ColorEntity CastRay(int x, int y)
+        private ColorEntity CastRay(RayEntity rayEntity)
         {
-            var fov = 1.57f;
-            var direction = new Vector3(
-                x + 0.5f - ((float)width * 0.5f),
-                y + 0.5f - ((float)height * 0.5f),
-                (float)width / (float)Math.Tan(fov * 0.5f));
-            direction = direction.Normalize();
-
-            var rayEntity = new RayEntity()
-            {
-                Origin = new Vector3(0.0f, 0.0f, 0.0f),
-                Direction = direction
-            };
             var intersect = SceneIntersect(rayEntity);
 
             if(intersect == null)
             {
-                return ColorEntity.Black;
+                return backgroundColor;
             }
 
             var diffuseLightIntensity = 0.0f;
