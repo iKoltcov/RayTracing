@@ -25,6 +25,7 @@ namespace RayTracing.OpenTK
         private int vertexBufferHandle;
         private int colorBufferHandle;
 
+        private float pointSize;
         private float[] arrayVertexs;
         private float[] arrayColors;
 
@@ -33,8 +34,8 @@ namespace RayTracing.OpenTK
             rayTracingService = new RayTracingService(cellWidth, cellHeight, countTask);
             shaderService = new ShaderService();
 
-            arrayVertexs = new float[cellWidth * cellHeight * 8 * vertexSize];
-            arrayColors = new float[cellWidth * cellHeight * 16 * colorSize];
+            arrayVertexs = new float[cellWidth * cellHeight * vertexSize];
+            arrayColors = new float[cellWidth * cellHeight * colorSize];
 
             colorBufferHandle = GL.GenBuffer();
             vertexBufferHandle = GL.GenBuffer();
@@ -52,6 +53,7 @@ namespace RayTracing.OpenTK
 
             float widthStep = Width / (float)cellWidth;
             float heightStep = Height / (float)cellHeight;
+            pointSize = Math.Max(1.0f, Math.Max(widthStep, heightStep) * 2.0f);
 
             for (int cellWidthIterator = 0; cellWidthIterator < cellWidth; cellWidthIterator++)
             {
@@ -59,18 +61,7 @@ namespace RayTracing.OpenTK
                 {
                     arrayVertexs[arrayVertexsIterator + 0] = widthStep * cellWidthIterator;
                     arrayVertexs[arrayVertexsIterator + 1] = heightStep * cellHeightIterator;
-                    arrayVertexs[arrayVertexsIterator + 2] = widthStep * cellWidthIterator + widthStep;
-                    arrayVertexs[arrayVertexsIterator + 3] = heightStep * cellHeightIterator;
-                    arrayVertexs[arrayVertexsIterator + 4] = widthStep * cellWidthIterator;
-                    arrayVertexs[arrayVertexsIterator + 5] = heightStep * cellHeightIterator + heightStep;
-
-                    arrayVertexs[arrayVertexsIterator + 6] = widthStep * cellWidthIterator + widthStep;
-                    arrayVertexs[arrayVertexsIterator + 7] = heightStep * cellHeightIterator;
-                    arrayVertexs[arrayVertexsIterator + 8] = widthStep * cellWidthIterator;
-                    arrayVertexs[arrayVertexsIterator + 9] = heightStep * cellHeightIterator + heightStep;
-                    arrayVertexs[arrayVertexsIterator + 10] = widthStep * cellWidthIterator + widthStep;
-                    arrayVertexs[arrayVertexsIterator + 11] = heightStep * cellHeightIterator + heightStep;
-                    arrayVertexsIterator += 12;
+                    arrayVertexsIterator += 2;
                 }
             }
 
@@ -90,32 +81,7 @@ namespace RayTracing.OpenTK
                     arrayColors[arrayColorsIterator + 1] = pixels[cellWidthIterator, cellHeightIterator].G;
                     arrayColors[arrayColorsIterator + 2] = pixels[cellWidthIterator, cellHeightIterator].B;
                     arrayColors[arrayColorsIterator + 3] = pixels[cellWidthIterator, cellHeightIterator].A;
-
-                    arrayColors[arrayColorsIterator + 4] = pixels[cellWidthIterator, cellHeightIterator].R;
-                    arrayColors[arrayColorsIterator + 5] = pixels[cellWidthIterator, cellHeightIterator].G;
-                    arrayColors[arrayColorsIterator + 6] = pixels[cellWidthIterator, cellHeightIterator].B;
-                    arrayColors[arrayColorsIterator + 7] = pixels[cellWidthIterator, cellHeightIterator].A;
-
-                    arrayColors[arrayColorsIterator + 8] = pixels[cellWidthIterator, cellHeightIterator].R;
-                    arrayColors[arrayColorsIterator + 9] = pixels[cellWidthIterator, cellHeightIterator].G;
-                    arrayColors[arrayColorsIterator + 10] = pixels[cellWidthIterator, cellHeightIterator].B;
-                    arrayColors[arrayColorsIterator + 11] = pixels[cellWidthIterator, cellHeightIterator].A;
-
-                    arrayColors[arrayColorsIterator + 12] = pixels[cellWidthIterator, cellHeightIterator].R;
-                    arrayColors[arrayColorsIterator + 13] = pixels[cellWidthIterator, cellHeightIterator].G;
-                    arrayColors[arrayColorsIterator + 14] = pixels[cellWidthIterator, cellHeightIterator].B;
-                    arrayColors[arrayColorsIterator + 15] = pixels[cellWidthIterator, cellHeightIterator].A;
-
-                    arrayColors[arrayColorsIterator + 16] = pixels[cellWidthIterator, cellHeightIterator].R;
-                    arrayColors[arrayColorsIterator + 17] = pixels[cellWidthIterator, cellHeightIterator].G;
-                    arrayColors[arrayColorsIterator + 18] = pixels[cellWidthIterator, cellHeightIterator].B;
-                    arrayColors[arrayColorsIterator + 19] = pixels[cellWidthIterator, cellHeightIterator].A;
-                    
-                    arrayColors[arrayColorsIterator + 20] = pixels[cellWidthIterator, cellHeightIterator].R;
-                    arrayColors[arrayColorsIterator + 21] = pixels[cellWidthIterator, cellHeightIterator].G;
-                    arrayColors[arrayColorsIterator + 22] = pixels[cellWidthIterator, cellHeightIterator].B;
-                    arrayColors[arrayColorsIterator + 23] = pixels[cellWidthIterator, cellHeightIterator].A;
-                    arrayColorsIterator += 24;
+                    arrayColorsIterator += 4;
                 }
             }
 
@@ -126,7 +92,7 @@ namespace RayTracing.OpenTK
         protected override void OnLoad(EventArgs e)
         {
             GL.Viewport(0, 0, Width, Height);
-            GL.ClearColor(1.0f, 1.0f, 0.8f, 1.0f);
+            GL.ClearColor(1.0f, 0.0f, 0.0f, 1.0f);
             GL.Enable(EnableCap.DepthTest);
 
             rayTracingService.AddLight(new PointLightEntity()
@@ -192,7 +158,8 @@ namespace RayTracing.OpenTK
             GL.VertexAttribPointer((int)ShaderAttributeEntity.Color, colorSize, VertexAttribPointerType.Float, false, 0, 0);
 
             GL.UniformMatrix4(shaderService.MatrixHandle, false, ref matrix);
-            GL.DrawArrays(PrimitiveType.Triangles, 0, cellWidth * cellHeight * 6);
+            GL.Uniform1(shaderService.PointSizeHandle, pointSize);
+            GL.DrawArrays(PrimitiveType.Points, 0, cellWidth * cellHeight);
 
             GL.DisableVertexAttribArray((int)ShaderAttributeEntity.Color);
             GL.DisableVertexAttribArray((int)ShaderAttributeEntity.Vertex);

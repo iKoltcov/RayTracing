@@ -8,9 +8,11 @@ namespace RayTracing.OpenTK.Services
     {
         public int ShaderProgram;
         public int MatrixHandle;
+        public int PointSizeHandle;
 
         public ShaderService()
         {
+            GL.Enable((EnableCap)0x8642); // EnableCap.ProgramPointSize from OpenTK.Graphics.OpenGL
             Compile();
         }
 
@@ -28,6 +30,7 @@ namespace RayTracing.OpenTK.Services
             GL.LinkProgram(ShaderProgram);
 
             MatrixHandle = GL.GetUniformLocation(ShaderProgram, "u_matrix");
+            PointSizeHandle = GL.GetUniformLocation(ShaderProgram, "u_pointSize");
 
             if (vertexShader != 0)
             {
@@ -69,11 +72,13 @@ namespace RayTracing.OpenTK.Services
 
         private static string vertexShaderCode =
             @"uniform mat4 u_matrix; 
+            uniform float u_pointSize;
             attribute vec2 a_vertex; 
             attribute vec4 a_color;
             varying vec4 v_color; 
             void main() { 
                 gl_Position = u_matrix * vec4(a_vertex, 0.0, 1.0);
+                gl_PointSize = u_pointSize;
                 v_color = a_color; 
             }";
         private static string fragmentShaderCode =
