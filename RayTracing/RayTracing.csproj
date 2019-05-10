@@ -9,5 +9,6 @@
     <Folder Include="Entities\" />
     <Folder Include="Entities\Interfaces\" />
     <Folder Include="Extensions\" />
+    <Folder Include="Results\" />
   </ItemGroup>
 </Project>

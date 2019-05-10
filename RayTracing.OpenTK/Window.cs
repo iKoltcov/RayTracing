@@ -12,8 +12,8 @@ namespace RayTracing.OpenTK
     public class Window : GameWindow
     {
         private readonly int countTask = 4;
-        private readonly int cellWidth = 450;
-        private readonly int cellHeight = 450;
+        private readonly int cellWidth = 512;
+        private readonly int cellHeight = 512;
 
         private readonly int vertexSize = 2;
         private readonly int colorSize = 4;
@@ -35,6 +35,9 @@ namespace RayTracing.OpenTK
 
             arrayVertexs = new float[cellWidth * cellHeight * 8 * vertexSize];
             arrayColors = new float[cellWidth * cellHeight * 16 * colorSize];
+
+            colorBufferHandle = GL.GenBuffer();
+            vertexBufferHandle = GL.GenBuffer();
 
             updateVertexs();
             updateColors(rayTracingService.GetPixels());
@@ -71,7 +74,6 @@ namespace RayTracing.OpenTK
                 }
             }
 
-            vertexBufferHandle = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferHandle);
             GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * arrayVertexs.Length, arrayVertexs, BufferUsageHint.DynamicDraw);
         }
@@ -117,7 +119,6 @@ namespace RayTracing.OpenTK
                 }
             }
 
-            colorBufferHandle = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, colorBufferHandle);
             GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * arrayColors.Length, arrayColors, BufferUsageHint.DynamicDraw);
         }
@@ -130,12 +131,17 @@ namespace RayTracing.OpenTK
 
             rayTracingService.AddLight(new PointLightEntity()
             {
-                Position = new System.Numerics.Vector3(0.0f, 10.0f, 0.0f),
+                Position = new System.Numerics.Vector3(10.0f, 10.0f, 0.0f),
                 Color = new ColorEntity(1.0f, 1.0f, 1.0f)
             });
             rayTracingService.AddLight(new PointLightEntity()
             {
-                Position = new System.Numerics.Vector3(10.0f, 10.0f, -5.0f),
+                Position = new System.Numerics.Vector3(-20.0f, 5.0f, -10.0f),
+                Color = new ColorEntity(1.0f, 1.0f, 1.0f)
+            });
+            rayTracingService.AddLight(new PointLightEntity()
+            {
+                Position = new System.Numerics.Vector3(-20.0f, -20.0f, -10.0f),
                 Color = new ColorEntity(1.0f, 1.0f, 1.0f)
             });
 
@@ -145,9 +151,9 @@ namespace RayTracing.OpenTK
                 {
                     rayTracingService.AddEssence(new SphereEntity
                         {
-                            Color = ColorEntity.Random,
+                            Material = MaterialEntity.Default,
                             Position = new System.Numerics.Vector3(i, j, 4.0f),
-                            Radius = 0.5f
+                            Radius = i == 0 && j == 0 ? 0.75f : 0.5f
                         });
                 }
             }

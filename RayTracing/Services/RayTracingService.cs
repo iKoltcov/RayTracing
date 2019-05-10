@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using RayTracing.Entities.Interfaces;
 using System.Numerics;
 using RayTracing.Extension;
+using RayTracing.Results;
 
 namespace RayTracing.Services
 {
@@ -99,10 +100,42 @@ namespace RayTracing.Services
                 Origin = new Vector3(0.0f, 0.0f, 0.0f),
                 Direction = direction
             };
+            var intersect = SceneIntersect(rayEntity);
 
-            IEssence essenceRef = null;
+            if(intersect == null)
+            {
+                return ColorEntity.Black;
+            }
+
+            var diffuseLightIntensity = 0.0f;
+            foreach(ILight light in lights)
+            {
+                var vectorToLight = light.Position - intersect.Point;
+                var directionToLight = vectorToLight.Normalize();
+                var distanceToLight = vectorToLight.Length();
+                var normal = (intersect.Point - intersect.EssenceIntersect.Position).Normalize();
+
+                var rayToLight = new RayEntity()
+                {
+                    Origin = intersect.Point + normal * 1e-5f,
+                    Direction = directionToLight
+                };
+
+                if(SceneIntersect(rayToLight, distanceToLight) == null)
+                {
+                    diffuseLightIntensity += Math.Max(0.0f, Vector3.Dot(directionToLight, normal));
+                }
+            }
+
+            return intersect.EssenceIntersect.Material.Color * diffuseLightIntensity;
+        }
+
+        private SceneIntersectResult SceneIntersect(RayEntity rayEntity, float? distanceMax = null)
+        {
             float? distanceMin = null;
+            IEssence essenceRef = null;
             Vector3? point = null;
+
             foreach (IEssence essence in essences)
             {
                 var collisionPoint = essence.CheckCollision(rayEntity);
@@ -110,7 +143,13 @@ namespace RayTracing.Services
                 if (collisionPoint.HasValue)
                 {
                     var distance = (rayEntity.Origin - collisionPoint.Value).Length();
-                    if(distanceMin == null || (distanceMin != null && distanceMin > distance))
+
+                    if (distanceMax != null && distanceMax.HasValue && distanceMax < distance)
+                    {
+                        continue;
+                    }
+
+                    if (distanceMin == null || (distanceMin != null && distanceMin > distance))
                     {
                         distanceMin = distance;
                         essenceRef = essence;
@@ -119,20 +158,16 @@ namespace RayTracing.Services
                 }
             }
 
-            if (essenceRef != null && point.HasValue)
+            if (essenceRef == null || !point.HasValue)
             {
-                var diffuseLightIntensity = 0.0f;
-                foreach(ILight light in lights)
-                {
-                    var directionToLight = (light.Position - point.Value).Normalize();
-                    var normal = (point.Value - essenceRef.Position).Normalize();
-                    diffuseLightIntensity += 1.5f * Math.Max(0.0f, Vector3.Dot(directionToLight, normal));
-                }
-
-                return (essenceRef as SphereEntity).Color.Copy() * diffuseLightIntensity;
+                return null;
             }
 
-            return ColorEntity.Black;
+            return new SceneIntersectResult()
+            {
+                EssenceIntersect = essenceRef,
+                Point = point.Value
+            };
         }
 
         public void Dispose()

@@ -9,7 +9,7 @@ namespace RayTracing.Entities
 
         public float Radius { get; set; }
 
-        public ColorEntity Color { get; set; }
+        public MaterialEntity Material { get; set; }
 
         public Vector3? CheckCollision(RayEntity ray)
         {

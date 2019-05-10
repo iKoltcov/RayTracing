@@ -30,7 +30,13 @@ namespace RayTracing.Entities
 
         public static ColorEntity White => new ColorEntity(1.0f, 1.0f, 1.0f);
 
-        public static ColorEntity Random => new ColorEntity((float)random.NextDouble(), (float)random.NextDouble(), (float)random.NextDouble());
+        public static ColorEntity Random() {
+            float r = (float)random.NextDouble() * 0.8f + 0.2f;
+            float g = (float)random.NextDouble() * 0.8f + 0.2f;
+            float b = (float)random.NextDouble() * 0.8f + 0.2f;
+
+            return new ColorEntity(r, g, b);
+        }
 
         public ColorEntity Set(float R, float G, float B, float A)
         {
