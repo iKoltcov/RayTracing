@@ -5,7 +5,7 @@ namespace RayTracing.OpenTK
     {
         static void Main(string[] args)
         {
-            Window window = new Window();
+            var window = new Window();
             window.Closing += (sender, e) => Environment.Exit(0);
         }
     }

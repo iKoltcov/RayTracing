@@ -40,14 +40,14 @@ namespace RayTracing.OpenTK
             colorBufferHandle = GL.GenBuffer();
             vertexBufferHandle = GL.GenBuffer();
 
-            updateVertexs();
-            updateColors(rayTracingService.GetPixels());
+            UpdateVertexs();
+            UpdateColors(rayTracingService.GetPixels());
 
             rayTracingService.Run();
             Run(60);
         }
 
-        private void updateVertexs()
+        private void UpdateVertexs()
         {
             int arrayVertexsIterator = 0;
 
@@ -69,7 +69,7 @@ namespace RayTracing.OpenTK
             GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * arrayVertexs.Length, arrayVertexs, BufferUsageHint.DynamicDraw);
         }
 
-        private void updateColors(ColorEntity[,] pixels)
+        private void UpdateColors(ColorEntity[,] pixels)
         {
             int arrayColorsIterator = 0;
 
@@ -132,7 +132,7 @@ namespace RayTracing.OpenTK
         {
             MakeCurrent();
             GL.Viewport(0, 0, Width, Height);
-            updateVertexs();
+            UpdateVertexs();
         }
 
         protected override void OnUnload(EventArgs e)
@@ -142,7 +142,7 @@ namespace RayTracing.OpenTK
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            updateColors(rayTracingService.GetPixels());
+            UpdateColors(rayTracingService.GetPixels());
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)

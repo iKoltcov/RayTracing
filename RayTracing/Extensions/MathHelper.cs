@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Numerics;
 
-namespace RayTracing.Extension
+namespace RayTracing.Extensions
 {
     public static class MathHelper
     {

@@ -53,16 +53,13 @@ namespace RayTracing.OpenTK.Services
             if (shader == 0)
                 throw new InvalidOperationException("Unable to create shader");
 
-            int length = 0;
             GL.ShaderSource(shader, 1, new string[] { source }, (int[])null);
             GL.CompileShader(shader);
 
-            int compiled = 0;
-            GL.GetShader(shader, ShaderParameter.CompileStatus, out compiled);
+            GL.GetShader(shader, ShaderParameter.CompileStatus, out var compiled);
             if (compiled == 0)
             {
-                length = 0;
-                GL.GetShader(shader, ShaderParameter.InfoLogLength, out length);
+                GL.GetShader(shader, ShaderParameter.InfoLogLength, out _);
                 GL.DeleteShader(shader);
                 throw new InvalidOperationException("Unable to compile shader of type : " + type.ToString());
             }

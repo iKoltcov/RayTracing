@@ -5,7 +5,7 @@ using System.Threading;
 using System.Collections.Generic;
 using RayTracing.Entities.Interfaces;
 using System.Numerics;
-using RayTracing.Extension;
+using RayTracing.Extensions;
 using RayTracing.Results;
 
 namespace RayTracing.Services

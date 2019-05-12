@@ -11,6 +11,6 @@ namespace RayTracing.Entities
 
         public Vector3 UpVector { get; set; }
 
-        public float FOVRadian { get; set; }
+        public float FieldOfViewRadian { get; set; }
     }
 }
