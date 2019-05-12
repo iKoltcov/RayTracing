@@ -12,7 +12,7 @@ namespace RayTracing.Services
 {
     public class RayTracingService : IDisposable
     {
-        private static readonly Random random = new Random();
+        private static readonly Random Random = new Random();
 
         private readonly int countTask;
         private readonly object lockObject = new object();
@@ -82,8 +82,8 @@ namespace RayTracing.Services
             {
                 lock (lockObject)
                 {
-                    var x = random.Next(0, width);
-                    var y = random.Next(0, height);
+                    var x = Random.Next(0, width);
+                    var y = Random.Next(0, height);
                     var direction = new Vector3(
                         x + 0.5f - width * 0.5f, 
                         y + 0.5f - height * 0.5f, 
@@ -119,7 +119,9 @@ namespace RayTracing.Services
 
                 var rayToLight = new RayEntity()
                 {
-                    Origin = intersect.Point + normal * 1e-5f,
+                    Origin = Vector3.Dot(directionToLight, normal) < 0 
+                        ? intersect.Point - normal * 1e-5f
+                        : intersect.Point + normal * 1e-5f,
                     Direction = directionToLight
                 };
 
