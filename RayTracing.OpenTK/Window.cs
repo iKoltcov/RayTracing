@@ -122,7 +122,7 @@ namespace RayTracing.OpenTK
                         {
                             Material = MaterialEntity.Default,
                             Position = new System.Numerics.Vector3(i, j, 4.0f),
-                            Radius = i == 0 && j == 0 ? 0.75f : 0.5f
+                            Radius = 0.5f
                         });
                 }
             }

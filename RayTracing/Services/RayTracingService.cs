@@ -12,20 +12,21 @@ namespace RayTracing.Services
 {
     public class RayTracingService : IDisposable
     {
-        private static Random random = new Random();
+        private static readonly Random random = new Random();
 
         private readonly int countTask;
         private readonly object lockObject = new object();
-        private CancellationTokenSource cancellationTokenSource;
+        private readonly CancellationTokenSource cancellationTokenSource;
 
-        private int width, height;
+        private readonly int width;
+        private readonly int height;
         private ColorEntity[,] pixels;
 
         private readonly float fieldOfView = 1.57f;
         private readonly ColorEntity backgroundColor = ColorEntity.Black; 
 
-        private List<IEssence> essences;
-        private List<ILight> lights;
+        private readonly List<IEssence> essences;
+        private readonly List<ILight> lights;
 
         public RayTracingService(int width, int height, int countTask)
         {
@@ -33,8 +34,8 @@ namespace RayTracing.Services
             this.height = height;
             this.countTask = countTask;
 
-            this.pixels = new ColorEntity[width, height];
-            this.cancellationTokenSource = new CancellationTokenSource();
+            pixels = new ColorEntity[width, height];
+            cancellationTokenSource = new CancellationTokenSource();
 
             for (int widthIterator = 0; widthIterator < width; widthIterator++) {
                 for (int heightIterator = 0; heightIterator < height; heightIterator++)
@@ -43,8 +44,8 @@ namespace RayTracing.Services
                 }
             }
 
-            this.essences = new List<IEssence>();
-            this.lights = new List<ILight>();
+            essences = new List<IEssence>();
+            lights = new List<ILight>();
         }
 
         public void AddLight(ILight light) 
@@ -68,7 +69,7 @@ namespace RayTracing.Services
 
         public void Run()
         {
-            for (int taskIterator = 0; taskIterator < countTask; taskIterator++)
+            for (var taskIterator = 0; taskIterator < countTask; taskIterator++)
             {
                 var cancellationToken = cancellationTokenSource.Token;
                 Task.Run(() => RaysTrace(cancellationToken), cancellationToken);
@@ -121,7 +122,7 @@ namespace RayTracing.Services
                 {
                     diffuseLightIntensity += (light.Intensity / distanceToLight * distanceToLight) * Math.Max(0.0f, Vector3.Dot(directionToLight, normal));
                 }
-            }
+            } 
 
             return intersect.EssenceIntersect.Material.Color * diffuseLightIntensity;
         }
@@ -132,29 +133,32 @@ namespace RayTracing.Services
             IEssence essenceRef = null;
             Vector3? point = null;
 
-            foreach (IEssence essence in essences)
+            foreach (var essence in essences)
             {
                 var collisionPoint = essence.CheckCollision(rayEntity);
 
-                if (collisionPoint.HasValue)
+                if (!collisionPoint.HasValue)
                 {
-                    var distance = (rayEntity.Origin - collisionPoint.Value).Length();
-
-                    if (distanceMax != null && distanceMax.HasValue && distanceMax < distance)
-                    {
-                        continue;
-                    }
-
-                    if (distanceMin == null || (distanceMin != null && distanceMin > distance))
-                    {
-                        distanceMin = distance;
-                        essenceRef = essence;
-                        point = collisionPoint;
-                    }
+                    continue;
                 }
+                
+                var distance = (rayEntity.Origin - collisionPoint.Value).Length();
+                if (distanceMax != null && distanceMax < distance)
+                {
+                    continue;
+                }
+
+                if (!(distanceMin == null ^ distanceMin > distance))
+                {
+                    continue;
+                }
+                
+                distanceMin = distance;
+                essenceRef = essence;
+                point = collisionPoint;
             }
 
-            if (essenceRef == null || !point.HasValue)
+            if (essenceRef == null)
             {
                 return null;
             }
