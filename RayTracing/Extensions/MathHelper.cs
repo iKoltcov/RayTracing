@@ -30,6 +30,10 @@ namespace RayTracing.Extensions
         {
             return Vector3.Normalize(vector);
         }
+        
+        public static Vector3 Reflect(this Vector3 vector, Vector3 normal) {
+            return vector - normal * 2.0f * Vector3.Dot(vector, normal);
+        }
 
         public static Matrix4x4 CreatePerspectiveFieldOfView(float fovy, float aspect, float zNear, float zFar)
         {

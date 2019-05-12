@@ -60,10 +60,24 @@ namespace RayTracing.Entities
 
         public static ColorEntity operator *(ColorEntity color, float value)
         {
-            float r = Math.Min(color.R * value, 1.0f);
-            float g = Math.Min(color.G * value, 1.0f);
-            float b = Math.Min(color.B * value, 1.0f);
+            var r = Math.Min(color.R * value, 1.0f);
+            var g = Math.Min(color.G * value, 1.0f);
+            var b = Math.Min(color.B * value, 1.0f);
 
+            return new ColorEntity(r, g, b);
+        }
+        
+        public static ColorEntity operator *(float value, ColorEntity color)
+        {
+            return color * value;
+        }
+
+        public static ColorEntity operator +(ColorEntity leftColor, ColorEntity rightColor)
+        {
+            var r = Math.Min(1.0f, leftColor.R + rightColor.R);
+            var g = Math.Min(1.0f, leftColor.G + rightColor.G);
+            var b = Math.Min(1.0f, leftColor.B + rightColor.B);
+                
             return new ColorEntity(r, g, b);
         }
     }

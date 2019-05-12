@@ -84,7 +84,10 @@ namespace RayTracing.Services
                 {
                     var x = random.Next(0, width);
                     var y = random.Next(0, height);
-                    var direction = new Vector3(x + 0.5f - (width * 0.5f), y + 0.5f - (height * 0.5f), width / (float)Math.Tan(fieldOfView * 0.5f));
+                    var direction = new Vector3(
+                        x + 0.5f - width * 0.5f, 
+                        y + 0.5f - height * 0.5f, 
+                        width / (float)Math.Tan(fieldOfView * 0.5f));
 
                     pixels[x, y] = CastRay(new RayEntity()
                     {
@@ -105,12 +108,14 @@ namespace RayTracing.Services
             }
 
             var diffuseLightIntensity = 0.0f;
-            foreach(ILight light in lights)
+            var specularLightIntensity = 0.0f;
+            
+            foreach(var light in lights)
             {
                 var vectorToLight = light.Position - intersect.Point;
                 var directionToLight = vectorToLight.Normalize();
                 var distanceToLight = vectorToLight.Length();
-                var normal = (intersect.Point - intersect.EssenceIntersect.Position).Normalize();
+                var normal = (intersect.Point - intersect.Essence.Position).Normalize();
 
                 var rayToLight = new RayEntity()
                 {
@@ -121,10 +126,12 @@ namespace RayTracing.Services
                 if(SceneIntersect(rayToLight, distanceToLight) == null)
                 {
                     diffuseLightIntensity += (light.Intensity / distanceToLight * distanceToLight) * Math.Max(0.0f, Vector3.Dot(directionToLight, normal));
+                    specularLightIntensity += (float)Math.Pow(Math.Max(0.0f, -Vector3.Dot((-directionToLight).Reflect(normal), rayEntity.Direction)), intersect.Essence.Material.Specular) * light.Intensity;
                 }
             } 
 
-            return intersect.EssenceIntersect.Material.Color * diffuseLightIntensity;
+            return intersect.Essence.Material.Color * diffuseLightIntensity * intersect.Essence.Material.DiffuseComponent 
+                   + new ColorEntity(1.0f, 1.0f, 1.0f) * specularLightIntensity * intersect.Essence.Material.SpecularComponent;
         }
 
         private SceneIntersectResult SceneIntersect(RayEntity rayEntity, float? distanceMax = null)
@@ -148,14 +155,12 @@ namespace RayTracing.Services
                     continue;
                 }
 
-                if (!(distanceMin == null ^ distanceMin > distance))
+                if (distanceMin == null ^ distanceMin > distance)
                 {
-                    continue;
+                    distanceMin = distance;
+                    essenceRef = essence;
+                    point = collisionPoint;
                 }
-                
-                distanceMin = distance;
-                essenceRef = essence;
-                point = collisionPoint;
             }
 
             if (essenceRef == null)
@@ -165,7 +170,7 @@ namespace RayTracing.Services
 
             return new SceneIntersectResult()
             {
-                EssenceIntersect = essenceRef,
+                Essence = essenceRef,
                 Point = point.Value
             };
         }
