@@ -24,9 +24,9 @@
         public static MaterialEntity Mirror => new MaterialEntity()
         {
             Color = ColorEntity.Random(),
-            DiffuseComponent = 0.4f,
-            SpecularComponent = 0.2f,
-            ReflectComponent = 0.4f,
+            DiffuseComponent = 0.1f,
+            SpecularComponent = 0.1f,
+            ReflectComponent = 0.8f,
             Specular = 40.0f
         };
     }
