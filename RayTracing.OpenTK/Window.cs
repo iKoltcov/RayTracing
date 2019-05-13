@@ -16,7 +16,7 @@ namespace RayTracing.OpenTK
         private readonly int cellHeight = 512;
 
         private readonly int vertexSize = 2;
-        private readonly int colorSize = 4;
+        private readonly int colorSize = 3;
          
         private readonly RayTracingService rayTracingService;
         private readonly ShaderService shaderService;
@@ -42,7 +42,10 @@ namespace RayTracing.OpenTK
 
             UpdateVertexs();
             UpdateColors(rayTracingService.GetPixels());
+        }
 
+        public void Start()
+        {
             rayTracingService.Run();
             Run(60);
         }
@@ -61,7 +64,7 @@ namespace RayTracing.OpenTK
                 {
                     arrayVertexs[arrayVertexsIterator + 0] = widthStep * cellWidthIterator;
                     arrayVertexs[arrayVertexsIterator + 1] = heightStep * cellHeightIterator;
-                    arrayVertexsIterator += 2;
+                    arrayVertexsIterator += vertexSize;
                 }
             }
 
@@ -69,7 +72,7 @@ namespace RayTracing.OpenTK
             GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * arrayVertexs.Length, arrayVertexs, BufferUsageHint.DynamicDraw);
         }
 
-        private void UpdateColors(ColorEntity[,] pixels)
+        private void UpdateColors(PixelEntity[,] pixels)
         {
             int arrayColorsIterator = 0;
 
@@ -77,11 +80,10 @@ namespace RayTracing.OpenTK
             {
                 for (int cellHeightIterator = 0; cellHeightIterator < cellHeight; cellHeightIterator++)
                 {
-                    arrayColors[arrayColorsIterator + 0] = pixels[cellWidthIterator, cellHeightIterator].R;
-                    arrayColors[arrayColorsIterator + 1] = pixels[cellWidthIterator, cellHeightIterator].G;
-                    arrayColors[arrayColorsIterator + 2] = pixels[cellWidthIterator, cellHeightIterator].B;
-                    arrayColors[arrayColorsIterator + 3] = pixels[cellWidthIterator, cellHeightIterator].A;
-                    arrayColorsIterator += 4;
+                    arrayColors[arrayColorsIterator + 0] = pixels[cellWidthIterator, cellHeightIterator].Color.R;
+                    arrayColors[arrayColorsIterator + 1] = pixels[cellWidthIterator, cellHeightIterator].Color.G;
+                    arrayColors[arrayColorsIterator + 2] = pixels[cellWidthIterator, cellHeightIterator].Color.B;
+                    arrayColorsIterator += colorSize;
                 }
             }
 
@@ -97,20 +99,14 @@ namespace RayTracing.OpenTK
 
             rayTracingService.AddLight(new PointLightEntity()
             {
-                Position = new System.Numerics.Vector3(10.0f, 10.0f, 0.0f),
-                Intensity = 0.4f,
-                Color = new ColorEntity(1.0f, 1.0f, 1.0f)
-            });
-            rayTracingService.AddLight(new PointLightEntity()
-            {
-                Position = new System.Numerics.Vector3(-20.0f, 5.0f, -10.0f),
+                Position = new System.Numerics.Vector3(10.0f, 0.0f, -5.0f),
                 Intensity = 0.6f,
                 Color = new ColorEntity(1.0f, 1.0f, 1.0f)
             });
             rayTracingService.AddLight(new PointLightEntity()
             {
-                Position = new System.Numerics.Vector3(-20.0f, -20.0f, -10.0f),
-                Intensity = 1.0f,
+                Position = new System.Numerics.Vector3(10.0f, 10.0f, -5.0f),
+                Intensity = 0.6f,
                 Color = new ColorEntity(1.0f, 1.0f, 1.0f)
             });
 
@@ -125,6 +121,30 @@ namespace RayTracing.OpenTK
                             Radius = 0.5f
                         });
                 }
+            }
+            
+            rayTracingService.AddEssence(new SphereEntity
+            {
+                Material = MaterialEntity.Default,
+                Position = new System.Numerics.Vector3(0.0f, 0.0f, 15.0f),
+                Radius = 10.0f
+            });
+        }
+        
+        public string GetPixelColor(int positionX, int positionY)
+        {
+            try
+            {                
+                var pixels = rayTracingService.GetPixels();
+                var x = (int) (positionX / (Width / (float) cellWidth));
+                var y = (int) (positionY / (Height / (float) cellHeight));
+
+                var color = pixels[x, y].Color;
+                return $"[{x},{y}] {color.R:F3} {color.G:F3} {color.B:F3}";
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -150,7 +170,7 @@ namespace RayTracing.OpenTK
             MakeCurrent();
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            matrix = Matrix4.CreateOrthographicOffCenter(0, Width, 0, Height, -1.0f, 1.0f);
+            matrix = Matrix4.CreateOrthographicOffCenter(0, Width, Height, 0, -1.0f, 1.0f);
 
             GL.EnableVertexAttribArray((int)ShaderAttributeEntity.Vertex);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferHandle);

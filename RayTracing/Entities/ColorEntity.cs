@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Numerics;
+
 namespace RayTracing.Entities
 {
     public class ColorEntity
@@ -11,21 +13,20 @@ namespace RayTracing.Entities
 
         public float B { get; set; }
 
-        public float A { get; set; }
-
-        public ColorEntity(float R, float G, float B, float A)
+        public ColorEntity(float R, float G, float B)
         {
             this.R = R;
             this.G = G;
             this.B = B;
-            this.A = A;
         }
 
-        public ColorEntity(float R, float G, float B) : this(R, G, B, 1.0f)
+        public ColorEntity(Vector3 vector)
         {
-
+            this.R = vector.X;
+            this.G = vector.Y;
+            this.B = vector.Z;
         }
-
+        
         public static ColorEntity Black => new ColorEntity(0.0f, 0.0f, 0.0f);
 
         public static ColorEntity White => new ColorEntity(1.0f, 1.0f, 1.0f);
@@ -38,24 +39,18 @@ namespace RayTracing.Entities
             return new ColorEntity(r, g, b);
         }
 
-        public ColorEntity Set(float R, float G, float B, float A)
+        public ColorEntity Set(float R, float G, float B)
         {
             this.R = R;
             this.G = G;
             this.B = B;
-            this.A = A;
 
             return this;
         }
 
-        public ColorEntity Set(float R, float G, float B)
-        {
-            return Set(R, G, B, 1.0f);
-        }
-
         public ColorEntity Copy()
         {
-            return new ColorEntity(R, G, B, A);
+            return new ColorEntity(R, G, B);
         }
 
         public static ColorEntity operator *(ColorEntity color, float value)
@@ -79,6 +74,11 @@ namespace RayTracing.Entities
             var b = Math.Min(1.0f, leftColor.B + rightColor.B);
                 
             return new ColorEntity(r, g, b);
+        }
+
+        public Vector3 ToVector3()
+        {
+            return new Vector3(R, G, B);
         }
     }
 }

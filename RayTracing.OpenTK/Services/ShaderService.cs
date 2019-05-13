@@ -71,17 +71,17 @@ namespace RayTracing.OpenTK.Services
             @"uniform mat4 u_matrix; 
             uniform float u_pointSize;
             attribute vec2 a_vertex; 
-            attribute vec4 a_color;
-            varying vec4 v_color; 
+            attribute vec3 a_color;
+            varying vec3 v_color; 
             void main() { 
                 gl_Position = u_matrix * vec4(a_vertex, 0.0, 1.0);
                 gl_PointSize = u_pointSize;
                 v_color = a_color; 
             }";
         private static string fragmentShaderCode =
-            @"varying vec4 v_color; 
+            @"varying vec3 v_color; 
             void main() { 
-                gl_FragColor = v_color; 
+                gl_FragColor = vec4(v_color, 1.0); 
             }";
     }
 }

@@ -20,7 +20,7 @@ namespace RayTracing.Services
 
         private readonly int width;
         private readonly int height;
-        private ColorEntity[,] pixels;
+        private PixelEntity[,] pixels;
 
         private readonly float fieldOfView = 1.57f;
         private readonly ColorEntity backgroundColor = ColorEntity.Black; 
@@ -34,13 +34,18 @@ namespace RayTracing.Services
             this.height = height;
             this.countTask = countTask;
 
-            pixels = new ColorEntity[width, height];
+            pixels = new PixelEntity[width, height];
             cancellationTokenSource = new CancellationTokenSource();
 
-            for (int widthIterator = 0; widthIterator < width; widthIterator++) {
-                for (int heightIterator = 0; heightIterator < height; heightIterator++)
+            for (var widthIterator = 0; widthIterator < width; widthIterator++) {
+                for (var heightIterator = 0; heightIterator < height; heightIterator++)
                 {
-                    pixels[widthIterator, heightIterator] = backgroundColor;
+                    pixels[widthIterator, heightIterator] = new PixelEntity()
+                    {
+                        Color = backgroundColor,
+                        AccumulationColors = new Vector3(),
+                        CountAccumulations = 0
+                    };
                 }
             }
 
@@ -58,7 +63,7 @@ namespace RayTracing.Services
             essences.Add(essence);
         }
 
-        public ColorEntity[,] GetPixels()
+        public PixelEntity[,] GetPixels()
         {
             if (pixels == null)
             {
@@ -85,15 +90,19 @@ namespace RayTracing.Services
                     var x = Random.Next(0, width);
                     var y = Random.Next(0, height);
                     var direction = new Vector3(
-                        x + 0.5f - width * 0.5f, 
-                        y + 0.5f - height * 0.5f, 
+                        x + (float)Random.NextDouble() - width * 0.5f, 
+                        -(y + (float)Random.NextDouble()) + height * 0.5f, 
                         width / (float)Math.Tan(fieldOfView * 0.5f));
 
-                    pixels[x, y] = CastRay(new RayEntity()
+                    var color = CastRay(new RayEntity()
                     {
                         Origin = new Vector3(0.0f, 0.0f, 0.0f),
                         Direction = direction.Normalize()
                     });
+
+                    //pixels[x, y].Color = color;
+                    pixels[x, y].AccumulationColors += color.ToVector3();
+                    pixels[x, y].Color = new ColorEntity(pixels[x, y].AccumulationColors / ++pixels[x, y].CountAccumulations);
                 }
             }
         }
