@@ -20,9 +20,10 @@ namespace RayTracing.Services
 
         private readonly int width;
         private readonly int height;
-        private PixelEntity[,] pixels;
+        private readonly PixelEntity[,] pixels;
 
         private readonly float fieldOfView = 1.57f;
+        private readonly int MaxDepthReflect = 2;
         private readonly ColorEntity backgroundColor = ColorEntity.Black; 
 
         private readonly List<IEssence> essences;
@@ -100,31 +101,30 @@ namespace RayTracing.Services
                         Direction = direction.Normalize()
                     });
 
-                    //pixels[x, y].Color = color;
                     pixels[x, y].AccumulationColors += color.ToVector3();
                     pixels[x, y].Color = new ColorEntity(pixels[x, y].AccumulationColors / ++pixels[x, y].CountAccumulations);
                 }
             }
         }
 
-        private ColorEntity CastRay(RayEntity rayEntity)
+        private ColorEntity CastRay(RayEntity rayEntity, int depth = 0)
         {
             var intersect = SceneIntersect(rayEntity);
 
-            if(intersect == null)
+            if(intersect == null || depth > MaxDepthReflect)
             {
                 return backgroundColor;
             }
 
             var diffuseLightIntensity = 0.0f;
             var specularLightIntensity = 0.0f;
+            var normal = (intersect.Point - intersect.Essence.Position).Normalize();
             
             foreach(var light in lights)
             {
                 var vectorToLight = light.Position - intersect.Point;
                 var directionToLight = vectorToLight.Normalize();
                 var distanceToLight = vectorToLight.Length();
-                var normal = (intersect.Point - intersect.Essence.Position).Normalize();
 
                 var rayToLight = new RayEntity()
                 {
@@ -139,10 +139,25 @@ namespace RayTracing.Services
                     diffuseLightIntensity += (light.Intensity / distanceToLight * distanceToLight) * Math.Max(0.0f, Vector3.Dot(directionToLight, normal));
                     specularLightIntensity += (float)Math.Pow(Math.Max(0.0f, -Vector3.Dot((-directionToLight).Reflect(normal), rayEntity.Direction)), intersect.Essence.Material.Specular) * light.Intensity;
                 }
-            } 
+            }
+
+            var reflectColor = new ColorEntity(0.0f, 0.0f, 0.0f);
+            if (intersect.Essence.Material.ReflectComponent > 0.0f)
+            {
+                var reflectDirection = rayEntity.Direction.Reflect(normal).Normalize();
+                var rayReflection = new RayEntity()
+                {
+                    Origin = Vector3.Dot(reflectDirection, normal) < 0 
+                        ? intersect.Point - normal * 1e-5f
+                        : intersect.Point + normal * 1e-5f,
+                    Direction = reflectDirection
+                };
+                reflectColor = CastRay(rayReflection, depth + 1);
+            }
 
             return intersect.Essence.Material.Color * diffuseLightIntensity * intersect.Essence.Material.DiffuseComponent 
-                   + new ColorEntity(1.0f, 1.0f, 1.0f) * specularLightIntensity * intersect.Essence.Material.SpecularComponent;
+                + new ColorEntity(1.0f, 1.0f, 1.0f) * specularLightIntensity * intersect.Essence.Material.SpecularComponent
+                + reflectColor * intersect.Essence.Material.ReflectComponent;
         }
 
         private SceneIntersectResult SceneIntersect(RayEntity rayEntity, float? distanceMax = null)

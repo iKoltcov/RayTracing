@@ -116,7 +116,7 @@ namespace RayTracing.OpenTK
                 {
                     rayTracingService.AddEssence(new SphereEntity
                         {
-                            Material = MaterialEntity.Default,
+                            Material = i == 0 && j == 0 ? MaterialEntity.Mirror : MaterialEntity.Default,
                             Position = new System.Numerics.Vector3(i, j, 4.0f),
                             Radius = 0.5f
                         });
