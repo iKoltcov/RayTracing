@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using OpenTK;
 using OpenTK.Graphics.ES20;
 using RayTracing.Services;
@@ -96,38 +97,73 @@ namespace RayTracing.OpenTK
             GL.Viewport(0, 0, Width, Height);
             GL.ClearColor(1.0f, 0.0f, 0.0f, 1.0f);
             GL.Enable(EnableCap.DepthTest);
-
+            
             rayTracingService.AddLight(new PointLightEntity()
             {
-                Position = new System.Numerics.Vector3(10.0f, 0.0f, -5.0f),
-                Intensity = 0.6f,
+                Position = new System.Numerics.Vector3(0.0f, 50.0f, 50.0f),
+                Intensity = 0.8f,
                 Color = new ColorEntity(1.0f, 1.0f, 1.0f)
             });
             rayTracingService.AddLight(new PointLightEntity()
             {
-                Position = new System.Numerics.Vector3(10.0f, 10.0f, -5.0f),
-                Intensity = 0.6f,
+                Position = new System.Numerics.Vector3(-20.0f, 50.0f, 100.0f),
+                Intensity = 0.8f,
                 Color = new ColorEntity(1.0f, 1.0f, 1.0f)
             });
 
-            for (int i = -1; i < 2; i++)
+            rayTracingService.AddEssence(new SphereEntity
             {
-                for(int j = -1; j < 2; j++)
-                {
-                    rayTracingService.AddEssence(new SphereEntity
-                        {
-                            Material = i == 0 && j == 0 ? MaterialEntity.Mirror : MaterialEntity.Default,
-                            Position = new System.Numerics.Vector3(i, j, 4.0f),
-                            Radius = 0.5f
-                        });
-                }
-            }
+                Material = MaterialEntity.Default,
+                Position = new System.Numerics.Vector3(-20.0f, 0.0f, 120.0f),
+                Radius = 20.0f
+            });
+            rayTracingService.AddEssence(new SphereEntity
+            {
+                Material = MaterialEntity.Default,
+                Position = new System.Numerics.Vector3(0.0f, -5.0f, 100.0f),
+                Radius = 15.0f
+            });
+            rayTracingService.AddEssence(new SphereEntity
+            {
+                Material = MaterialEntity.Default,
+                Position = new System.Numerics.Vector3(10.0f, -10.0f, 80.0f),
+                Radius = 10.0f
+            });
+            rayTracingService.AddEssence(new SphereEntity
+            {
+                Material = MaterialEntity.Default,
+                Position = new System.Numerics.Vector3(15.0f, -15.0f, 70.0f),
+                Radius = 5.0f
+            });
+            rayTracingService.AddEssence(new SphereEntity
+            {
+                Material = MaterialEntity.Default,
+                Position = new System.Numerics.Vector3(17.0f, -17.5f, 65.0f),
+                Radius = 2.5f
+            });
             
             rayTracingService.AddEssence(new SphereEntity
             {
                 Material = MaterialEntity.Default,
-                Position = new System.Numerics.Vector3(0.0f, 0.0f, 15.0f),
-                Radius = 10.0f
+                Position = new System.Numerics.Vector3(18.0f, -18.75f, 62.5f),
+                Radius = 1.25f
+            });
+            
+            
+            rayTracingService.AddEssence(new QuadEntity()
+            {
+                Material = new MaterialEntity()
+                {
+                    Color = ColorEntity.White,
+                    DiffuseComponent = 0.7f,
+                    ReflectComponent = 0.3f,
+                },
+                Position = new System.Numerics.Vector3(0.0f, -20.0f, 100.0f),
+                Normal = new System.Numerics.Vector3(0.0f, 1.0f, 0.0f),
+                VertexA = new System.Numerics.Vector3(-1000.0f, 0.0f,  1000.0f),
+                VertexB = new System.Numerics.Vector3(1000.0f, 0.0f,  1000.0f),
+                VertexC = new System.Numerics.Vector3(1000.0f, 0.0f,  -1000.0f),
+                VertexD = new System.Numerics.Vector3(-1000.0f, 0.0f,  -1000.0f)
             });
         }
         

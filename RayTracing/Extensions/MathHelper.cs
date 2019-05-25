@@ -1,31 +1,11 @@
 ﻿using System;
 using System.Numerics;
+using RayTracing.Entities;
 
 namespace RayTracing.Extensions
 {
     public static class MathHelper
     {
-        /// <summary>Transform a Vector by the given Matrix using right-handed notation</summary>
-        /// <param name="matrix">The desired transformation</param>
-        /// <param name="vector">The vector to transform</param>
-        public static Vector4 Transform(this Vector4 vector, Matrix4x4 matrix)
-        {
-            return new Vector4(
-                matrix.M11 * vector.X + matrix.M12 * vector.Y + matrix.M13 * vector.Z + matrix.M14 * vector.W,
-                matrix.M21 * vector.X + matrix.M22 * vector.Y + matrix.M23 * vector.Z + matrix.M24 * vector.W,
-                matrix.M31 * vector.X + matrix.M32 * vector.Y + matrix.M33 * vector.Z + matrix.M34 * vector.W,
-                matrix.M41 * vector.X + matrix.M42 * vector.Y + matrix.M43 * vector.Z + matrix.M44 * vector.W);
-        }
-
-        public static Matrix4x4 Invert(this Matrix4x4 matrix)
-        {
-            if(!Matrix4x4.Invert(matrix, out var matrixInverted))
-            {
-                throw new ArithmeticException("Could not invert matrix");
-            }
-            return matrixInverted;
-        }
-
         public static Vector3 Normalize(this Vector3 vector)
         {
             return Vector3.Normalize(vector);
@@ -34,35 +14,45 @@ namespace RayTracing.Extensions
         public static Vector3 Reflect(this Vector3 vector, Vector3 normal) {
             return vector - normal * 2.0f * Vector3.Dot(vector, normal);
         }
-
-        public static Matrix4x4 CreatePerspectiveFieldOfView(float fovy, float aspect, float zNear, float zFar)
+        
+        public static Vector3? IntersectTriangle(this RayEntity rayEntity, Vector3 vertexA, Vector3 vertexB, Vector3 vertexC, Vector3 normal) 
         {
-            if (fovy <= 0 || fovy > Math.PI)
-                throw new ArgumentOutOfRangeException("fovy");
-            if (aspect <= 0)
-                throw new ArgumentOutOfRangeException("aspect");
-            if (zNear <= 0)
-                throw new ArgumentOutOfRangeException("zNear");
-            if (zFar <= 0)
-                throw new ArgumentOutOfRangeException("zFar");
-            if (zNear >= zFar)
-                throw new ArgumentOutOfRangeException("zNear");
+            var d = -normal.X * vertexA.X - normal.Y * vertexA.Y - normal.Z * vertexA.Z;
+            var a = (Vector3.Dot(rayEntity.Origin, normal) - d) / Vector3.Dot(rayEntity.Direction, normal);
+            if (a < 0)
+            {
+                return null;
+            }
 
-            float yMax = zNear * (float)Math.Tan(0.5f * fovy);
-            float yMin = -yMax;
-            float xMin = yMin * aspect;
-            float xMax = yMax * aspect;
-            float x = (2.0f * zNear) / (xMax - xMin);
-            float y = (2.0f * zNear) / (yMax - yMin);
-            float a = (xMax + xMin) / (xMax - xMin);
-            float b = (yMax + yMin) / (yMax - yMin);
-            float c = -(zFar + zNear) / (zFar - zNear);
-            float d = -(2.0f * zFar * zNear) / (zFar - zNear);
+            var point = rayEntity.Origin + rayEntity.Direction * a;
+            if(point.IntersectTriangle(vertexA, vertexB, vertexC))
+            {
+                return point;
+            }
 
-            return new Matrix4x4(x, 0, 0, 0,
-                                 0, y, 0, 0,
-                                 a, b, c, -1,
-                                 0, 0, d, 0);
+            return null;
+        }
+        
+        private static bool IntersectTriangle(this Vector3 point, Vector3 vertexA, Vector3 vertexB, Vector3 vertexC)
+        {
+            var v0 = vertexC - vertexA;
+            var v1 = vertexB - vertexA;
+            var v2 = point - vertexA;
+
+            var dot00 = Vector3.Dot(v0, v0);
+            var dot01 = Vector3.Dot(v0, v1);
+            var dot02 = Vector3.Dot(v0, v2);
+            var dot11 = Vector3.Dot(v1, v1);
+            var dot12 = Vector3.Dot(v1, v2);
+
+            var invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+            var u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+            if (u < 0) {
+                return false;
+            }
+
+            var v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+            return (v > 0) && (u + v < 1.0f);
         }
     }
 }

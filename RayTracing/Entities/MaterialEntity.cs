@@ -18,16 +18,16 @@
             DiffuseComponent = 0.9f,
             SpecularComponent = 0.1f,
             ReflectComponent = 0.0f,
-            Specular = 120.0f
+            Specular = 50.0f
         };
 
         public static MaterialEntity Mirror => new MaterialEntity()
         {
-            Color = ColorEntity.Random(),
+            Color = ColorEntity.White,
             DiffuseComponent = 0.1f,
             SpecularComponent = 0.1f,
             ReflectComponent = 0.8f,
-            Specular = 40.0f
+            Specular = 50.0f
         };
     }
 }

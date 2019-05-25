@@ -23,8 +23,10 @@ namespace RayTracing.Services
         private readonly PixelEntity[,] pixels;
 
         private readonly float fieldOfView = 1.57f;
-        private readonly int MaxDepthReflect = 2;
-        private readonly ColorEntity backgroundColor = ColorEntity.Black; 
+        private readonly int maxDepthReflect = 5;
+        private readonly float epsilon = 1e-3f;
+        
+        private readonly ColorEntity backgroundColor = new ColorEntity(0.0f, 0.6f, 0.9f); 
 
         private readonly List<IEssence> essences;
         private readonly List<ILight> lights;
@@ -90,15 +92,18 @@ namespace RayTracing.Services
                 {
                     var x = Random.Next(0, width);
                     var y = Random.Next(0, height);
+                    var offsetX = (float) Random.NextDouble();
+                    var offsetY = (float) Random.NextDouble();
                     var direction = new Vector3(
-                        x + (float)Random.NextDouble() - width * 0.5f, 
-                        -(y + (float)Random.NextDouble()) + height * 0.5f, 
-                        width / (float)Math.Tan(fieldOfView * 0.5f));
+                            x + offsetX - width * 0.5f,
+                            -(y + offsetY) + height * 0.5f,
+                            width / (float) Math.Tan(fieldOfView * 0.5f))
+                        .Normalize();
 
                     var color = CastRay(new RayEntity()
                     {
                         Origin = new Vector3(0.0f, 0.0f, 0.0f),
-                        Direction = direction.Normalize()
+                        Direction = direction
                     });
 
                     pixels[x, y].AccumulationColors += color.ToVector3();
@@ -109,16 +114,21 @@ namespace RayTracing.Services
 
         private ColorEntity CastRay(RayEntity rayEntity, int depth = 0)
         {
+            if (depth > maxDepthReflect)
+            {
+                return backgroundColor;
+            }
+            
             var intersect = SceneIntersect(rayEntity);
 
-            if(intersect == null || depth > MaxDepthReflect)
+            if(intersect == null)
             {
                 return backgroundColor;
             }
 
             var diffuseLightIntensity = 0.0f;
             var specularLightIntensity = 0.0f;
-            var normal = (intersect.Point - intersect.Essence.Position).Normalize();
+            var normal = intersect.Essence.GetNormal(intersect.Point);
             
             foreach(var light in lights)
             {
@@ -129,11 +139,11 @@ namespace RayTracing.Services
                 var rayToLight = new RayEntity()
                 {
                     Origin = Vector3.Dot(directionToLight, normal) < 0 
-                        ? intersect.Point - normal * 1e-5f
-                        : intersect.Point + normal * 1e-5f,
+                        ? intersect.Point - directionToLight * epsilon
+                        : intersect.Point + directionToLight * epsilon,
                     Direction = directionToLight
                 };
-
+                
                 if(SceneIntersect(rayToLight, distanceToLight) == null)
                 {
                     diffuseLightIntensity += (light.Intensity / distanceToLight * distanceToLight) * Math.Max(0.0f, Vector3.Dot(directionToLight, normal));
@@ -145,14 +155,14 @@ namespace RayTracing.Services
             if (intersect.Essence.Material.ReflectComponent > 0.0f)
             {
                 var reflectDirection = rayEntity.Direction.Reflect(normal).Normalize();
-                var rayReflection = new RayEntity()
+                var reflectionRay = new RayEntity()
                 {
                     Origin = Vector3.Dot(reflectDirection, normal) < 0 
-                        ? intersect.Point - normal * 1e-5f
-                        : intersect.Point + normal * 1e-5f,
+                        ? intersect.Point - normal * epsilon
+                        : intersect.Point + normal * epsilon,
                     Direction = reflectDirection
                 };
-                reflectColor = CastRay(rayReflection, depth + 1);
+                reflectColor = CastRay(reflectionRay, depth + 1);
             }
 
             return intersect.Essence.Material.Color * diffuseLightIntensity * intersect.Essence.Material.DiffuseComponent 
@@ -162,9 +172,9 @@ namespace RayTracing.Services
 
         private SceneIntersectResult SceneIntersect(RayEntity rayEntity, float? distanceMax = null)
         {
+            Vector3? point = null;
             float? distanceMin = null;
             IEssence essenceRef = null;
-            Vector3? point = null;
 
             foreach (var essence in essences)
             {
